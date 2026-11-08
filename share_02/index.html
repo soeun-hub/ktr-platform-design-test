@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>해커톤 디자인_v2.0</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+    * {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 5px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body class="bg-[#E9F1F8] min-h-screen text-slate-800 antialiased flex flex-col p-4 md:p-6 lg:p-8 select-none">
+
+  <!-- 전체 레이아웃 래퍼  -->
+  <div class="max-w-[1440px] max-h-[800px] w-full mx-auto flex-1 flex flex-col space-y-4"> 
+                          <!-- 소은: max-h-[800px] 추가함  -->
+    <!-- 상단 GNB -->
+    <header class="flex items-center justify-between px-2 py-1" style="margin-top: 2%; margin-right: 0%;  margin-bottom: 3.5%; margin-left: 0%;"> <!-- 소은: margin 위아래로 넣음 -->
+      <div onclick="switchView('dashboard')" class="flex items-center space-x-3 cursor-pointer">
+        <span class="text-2xl font-black text-[#0B3B70] tracking-tight">KTR</span>
+        <span class="text-xl font-bold text-slate-700">시험·인증 통합 플랫폼</span>
+      </div>
+      <div class="flex items-center space-x-3">
+        <span class="text-sm font-semibold text-slate-700">(주)에이치켐 / 홍길동 수석</span>
+        <div class="w-8 h-8 rounded-full bg-slate-300 flex items-center justify-center overflow-hidden border border-slate-200">
+          <i data-lucide="user" class="w-5 h-5 text-slate-600"></i>
+        </div>
+      </div>
+    </header>
+
+    <!-- 메인 대시보드 프레임 -->
+    <div class="bg-white/90 backdrop-blur-sm rounded-3xl p-6 shadow-sm border border-slate-200/60 flex-1 flex flex-col space-y-6">
+
+      <!-- 헤더 서브 바 (타이틀 + 모드 토글) -->
+      <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div class="flex items-center space-x-4">
+          <h1 id="pageTitle" class="text-2xl font-bold text-slate-900">대시보드</h1>
+        </div>
+
+        <!-- 모드 전환 세그먼트 버튼 -->
+        <div class="flex items-center space-x-2">
+          <div class="bg-slate-100 p-1 rounded-2xl flex text-xs font-semibold">
+            <button onclick="switchView('dashboard')" id="btnCust" class="px-5 py-2 rounded-xl bg-[#0F2942] text-white shadow-sm transition">고객용</button>
+            <button class="px-5 py-2 rounded-xl text-slate-500 hover:text-slate-800 transition">임직원용</button>
+            <button class="px-5 py-2 rounded-xl text-slate-500 hover:text-slate-800 transition">전체 (정보도서관)</button>
+          </div>
+          <!-- 나의 현황 전용 바로가기 버튼 (상호 전환용) -->
+          <button onclick="toggleMyStatusView()" id="btnMyStatusToggle" class="px-4 py-2 bg-blue-50 text-blue-700 text-xs font-bold rounded-xl border border-blue-200/60 hover:bg-blue-100 transition flex items-center space-x-1">
+            <i data-lucide="layout" class="w-3.5 h-3.5"></i>
+            <span id="btnMyStatusText">나의 현황 뷰 보기</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 본문 영역: 사이드바 + 뷰 영역 -->
+      <div class="flex-1 grid grid-cols-12 gap-6 min-h-[640px]">
+
+        <!-- 좌측 사이드바 -->
+        <aside class="col-span-12 md:col-span-3 lg:col-span-2 space-y-1 pr-2">
+          <button onclick="switchView('dashboard')" id="navHome" class="w-full flex items-center space-x-3 px-4 py-3 rounded-2xl bg-blue-50 text-[#0B3B70] font-bold text-sm transition">
+            <i data-lucide="home" class="w-4 h-4"></i>
+            <span>홈</span>
+          </button>
+          <button onclick="openModal('chatModal')" class="w-full flex items-center space-x-3 px-4 py-3 rounded-2xl text-slate-600 hover:bg-slate-50 font-medium text-sm transition">
+            <i data-lucide="file-plus-2" class="w-4 h-4"></i>
+            <span>시험 의뢰</span>
+          </button>
+          <button class="w-full flex items-center space-x-3 px-4 py-3 rounded-2xl text-slate-600 hover:bg-slate-50 font-medium text-sm transition">
+            <i data-lucide="scale" class="w-4 h-4"></i>
+            <span>법령 및 정보</span>
+          </button>
+          <button onclick="switchView('mystatus')" id="navStatus" class="w-full flex items-center space-x-3 px-4 py-3 rounded-2xl text-slate-600 hover:bg-slate-50 font-medium text-sm transition">
+            <i data-lucide="clipboard-check" class="w-4 h-4"></i>
+            <span>나의 현황</span>
+          </button>
+          <button class="w-full flex items-center space-x-3 px-4 py-3 rounded-2xl text-slate-600 hover:bg-slate-50 font-medium text-sm transition">
+            <i data-lucide="file-text" class="w-4 h-4"></i>
+            <span>나의 성적서</span>
+          </button>
+          <button class="w-full flex items-center space-x-3 px-4 py-3 rounded-2xl text-slate-600 hover:bg-slate-50 font-medium text-sm transition">
+            <i data-lucide="message-square" class="w-4 h-4"></i>
+            <span>나의 Q&A</span>
+          </button>
+          <button class="w-full flex items-center space-x-3 px-4 py-3 rounded-2xl text-slate-600 hover:bg-slate-50 font-medium text-sm transition">
+            <i data-lucide="bell-ring" class="w-4 h-4"></i>
+            <span>관심분야·정기알림</span>
+          </button>
+        </aside>
+
+        <!-- 우측 콘텐츠 화면 (대시보드 OR 나의 현황) -->
+        <div class="col-span-12 md:col-span-9 lg:col-span-10 flex flex-col">
+
+          <!-- 뷰 1: 로그인 후 메인 대시보드 (1_1) -->
+          <div id="viewDashboard" class="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1">
+            
+            <!-- 카드 1: 시험 의뢰 (AI 스마트 접수) -->
+            <div class="bg-white rounded-3xl p-6 border border-slate-200/70 shadow-sm flex flex-col justify-between hover:shadow-md transition">
+              <div>
+                <h2 class="text-xl font-black text-slate-900 tracking-tight">시험 의뢰</h2>
+                <p class="text-xs font-semibold text-slate-500 mt-0.5">(AI 스마트 시험 접수)</p>
+
+                <!-- 일러스트 영역 -->
+                <div class="my-6 flex flex-col items-center justify-center">
+                  <div class="relative w-28 h-28 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center">
+                    <i data-lucide="bot" class="w-14 h-14 text-blue-600"></i>
+                    <span class="absolute -top-1 -right-1 px-2.5 py-0.5 rounded-full bg-sky-400 text-white text-[10px] font-black uppercase shadow-sm">AI</span>
+                  </div>
+                </div>
+
+                <!-- 안내 및 진행 상태 -->
+                <div class="space-y-3">
+                  <div class="flex justify-between items-center text-xs font-bold text-slate-700">
+                    <span>시험의뢰 접수</span>
+                    <span class="text-slate-400">100%</span>
+                  </div>
+                  <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden">
+                    <div class="bg-[#0F2942] h-2 rounded-full w-2/5"></div>
+                  </div>
+                  <div class="pt-2">
+                    <div class="text-sm font-bold text-blue-600">원클릭 시작</div>
+                    <div class="text-xs text-slate-600 font-semibold mt-0.5">쉽게 1클릭 시작 활용!</div>
+                    <p class="text-[11px] text-slate-400 mt-1">복잡한 규격 입력 없이 AI가 서류와 용도를 분석합니다.</p>
+                  </div>
+                </div>
+              </div>
+
+              <button onclick="openModal('chatModal')" class="mt-6 w-full py-3.5 bg-[#0F2942] hover:bg-[#081c30] text-white rounded-2xl font-bold text-sm transition shadow-sm flex items-center justify-center space-x-1.5">
+                <span>신청하기 시작</span>
+                <i data-lucide="chevron-right" class="w-4 h-4"></i>
+              </button>
+            </div>
+
+            <!-- 카드 2: 법령 및 정보 (최신 고시·지원사업) -->
+            <div class="bg-white rounded-3xl p-6 border border-slate-200/70 shadow-sm flex flex-col justify-between hover:shadow-md transition">
+              <div>
+                <h2 class="text-xl font-black text-slate-900 tracking-tight">법령 및 정보</h2>
+                <p class="text-xs font-semibold text-slate-500 mt-0.5">(최신 고시·지원사업)</p>
+
+                <!-- 일러스트 대용 데이터 차트 그래픽 -->
+                <div class="my-6 p-4 rounded-2xl bg-blue-50/50 border border-blue-100/60 flex items-center justify-between">
+                  <div class="space-y-1">
+                    <span class="text-[11px] font-bold text-blue-700 uppercase">KTR DATA INSIGHT</span>
+                    <div class="text-xs text-slate-600 font-semibold">2026 규제 개정 요약</div>
+                  </div>
+                  <i data-lucide="bar-chart-3" class="w-10 h-10 text-blue-400"></i>
+                </div>
+
+                <!-- 최근 목록 리스트 -->
+                <div class="space-y-2">
+                  <div class="text-xs font-bold text-slate-800">최근 목록</div>
+                  <ul class="text-xs text-slate-600 space-y-2">
+                    <li class="flex items-center justify-between hover:text-blue-600 cursor-pointer">
+                      <span class="truncate pr-2">• 최근 방영고시 및 법령 고시 정보</span>
+                      <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-400"></i>
+                    </li>
+                    <li class="flex items-center justify-between hover:text-blue-600 cursor-pointer">
+                      <span class="truncate pr-2">• 화학물질 등록 시험 수수료 감면 고시</span>
+                      <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-400"></i>
+                    </li>
+                    <li class="flex items-center justify-between hover:text-blue-600 cursor-pointer">
+                      <span class="truncate pr-2">• 유해물질 사전 분석 및 접수 요령</span>
+                      <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-400"></i>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              <!-- 표준 규제 배지들 -->
+              <div class="pt-4 border-t border-slate-100 flex items-center justify-center space-x-3">
+                <span class="w-10 h-10 rounded-full bg-blue-100 text-blue-800 text-[10px] font-black flex items-center justify-center border border-blue-200">법령규제</span>
+                <span class="w-10 h-10 rounded-full bg-sky-100 text-sky-800 text-[10px] font-black flex items-center justify-center border border-sky-200">표준정보</span>
+                <span class="w-10 h-10 rounded-full bg-amber-100 text-amber-800 text-[10px] font-black flex items-center justify-center border border-amber-200">지원사업</span>
+              </div>
+            </div>
+
+            <!-- 카드 3: 나의 현황 (진행 상황·성적서 관리) -->
+            <div class="bg-white rounded-3xl p-6 border border-slate-200/70 shadow-sm flex flex-col justify-between hover:shadow-md transition">
+              <div>
+                <h2 class="text-xl font-black text-slate-900 tracking-tight">나의 현황</h2>
+                <p class="text-xs font-semibold text-slate-500 mt-0.5">(진행 상황·성적서 관리)</p>
+
+                <!-- 미니 대체보드 -->
+                <div class="my-6 p-4 rounded-2xl bg-slate-50 border border-slate-200/70 space-y-3">
+                  <div class="flex justify-between items-center text-xs">
+                    <span class="font-bold text-slate-700">미니 대시보드</span>
+                    <span class="text-blue-600 font-semibold">7~10일 소요 예정</span>
+                  </div>
+                  <!-- 간이 진행 바 -->
+                  <div class="relative flex items-center justify-between text-[11px] text-slate-400 font-semibold pt-1">
+                    <span class="text-slate-800">접수완료</span>
+                    <span class="text-blue-600 font-bold">시험중(95%)</span>
+                    <span>성적서 발급</span>
+                  </div>
+                </div>
+
+                <!-- 시험 진행정보 목록 -->
+                <div class="space-y-2">
+                  <div class="text-xs font-bold text-slate-800">진행 정보 관리</div>
+                  <ul class="text-xs text-slate-600 space-y-2">
+                    <li onclick="switchView('mystatus')" class="flex items-center justify-between hover:text-blue-600 cursor-pointer">
+                      <span>• 시험 진행 상황 및 발급예정일 확인</span>
+                      <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-400"></i>
+                    </li>
+                    <li onclick="switchView('mystatus')" class="flex items-center justify-between hover:text-blue-600 cursor-pointer">
+                      <span>• 인증 시험 성적서 위변조방지 열람</span>
+                      <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-400"></i>
+                    </li>
+                    <li onclick="switchView('mystatus')" class="flex items-center justify-between hover:text-blue-600 cursor-pointer">
+                      <span>• 정기검사 사전 알림 및 Q&A 이력</span>
+                      <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-400"></i>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              <button onclick="switchView('mystatus')" class="mt-6 w-full py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-2xl font-bold text-sm transition flex items-center justify-center space-x-1">
+                <span>상세현황 보기</span>
+                <i data-lucide="arrow-right" class="w-4 h-4"></i>
+              </button>
+            </div>
+
+          </div>
+
+          <!-- 뷰 2: 나의 현황 (1_4) -->
+          <div id="viewMyStatus" class="hidden flex-1 flex flex-col space-y-6">
+            
+            <!-- 상단 현황 카드 프레임 -->
+            <div class="bg-gradient-to-r from-blue-50/80 to-white rounded-3xl p-6 border border-blue-100/80 shadow-sm space-y-6">
+              
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-blue-100/60 pb-4">
+                <div>
+                  <h2 class="text-lg font-black text-slate-900">진행 중인 시험 분석 현황</h2>
+                  <p class="text-xs text-slate-500 mt-0.5">접수번호: KTR-2026-0042 (친환경 세정제 원료)</p>
+                </div>
+                <div class="flex items-center space-x-2">
+                  <span class="px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-200">
+                    D-2 성적서 발급 예정
+                  </span>
+                  <span class="text-xs text-blue-600 font-bold bg-white px-3 py-1 rounded-full border border-blue-200">
+                    접수현황 95%
+                  </span>
+                </div>
+              </div>
+
+              <!-- 대형 프로그레스 바 -->
+              <div class="space-y-2">
+                <div class="w-full bg-slate-200/70 rounded-full h-3 overflow-hidden">
+                  <div class="bg-[#38BDF8] h-3 rounded-full transition-all duration-700" style="width: 95%;"></div>
+                </div>
+                <div class="flex justify-between text-xs font-semibold text-slate-600">
+                  <span>95% 시험 분석 중</span>
+                  <span class="text-slate-400">분석 완료 직전 단계</span>
+                </div>
+              </div>
+
+              <!-- 3대 그리드 카드 (성적서, 이력, Q&A) -->
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                
+                <!-- 나의 성적서 -->
+                <div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center justify-between">
+                  <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+                      <i data-lucide="file-check" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                      <div class="text-xs font-bold text-slate-900">나의 성적서</div>
+                      <div class="text-[11px] text-slate-400">공식 전자성적서</div>
+                    </div>
+                  </div>
+                  <span class="w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center">
+                    <i data-lucide="check" class="w-3.5 h-3.5"></i>
+                  </span>
+                </div>
+
+                <!-- 이력 성적서 -->
+                <div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center justify-between">
+                  <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center">
+                      <i data-lucide="history" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                      <div class="text-xs font-bold text-slate-900">이력 성적서</div>
+                      <div class="text-[11px] text-slate-400">선행 인증 조회</div>
+                    </div>
+                  </div>
+                  <span class="w-6 h-6 rounded-full bg-blue-500 text-white flex items-center justify-center">
+                    <i data-lucide="search" class="w-3.5 h-3.5"></i>
+                  </span>
+                </div>
+
+                <!-- 나의 Q&A -->
+                <div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm flex items-center justify-between">
+                  <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+                      <i data-lucide="message-circle" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                      <div class="text-xs font-bold text-slate-900">나의 Q&A</div>
+                      <div class="text-[11px] text-slate-400">전문가 1:1 상담</div>
+                    </div>
+                  </div>
+                  <span class="w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center">
+                    <i data-lucide="check" class="w-3.5 h-3.5"></i>
+                  </span>
+                </div>
+
+              </div>
+
+            </div>
+
+            <!-- 하단: AI 맞춤형 규제/지원사업 추천 플로팅 스타일 카드 (1_4 우측 위젯) -->
+            <div class="bg-[#0F2942] text-white rounded-3xl p-6 shadow-md border border-slate-700/50 flex flex-col md:flex-row items-center justify-between gap-4">
+              <div class="space-y-2">
+                <div class="flex items-center space-x-2">
+                  <i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i>
+                  <span class="text-xs font-black tracking-wider text-amber-300 uppercase">AI 맞춤형 규제/지원사업 추천</span>
+                  <span class="bg-blue-600 text-white text-[10px] font-black px-1.5 py-0.5 rounded-md">AI+</span>
+                </div>
+                <h3 class="text-base font-bold text-white">2026 개정 화학물질 관리법 적합성 정기검사 주기 도래 안내</h3>
+                <div class="flex items-center space-x-2 pt-1 text-xs">
+                  <span class="bg-slate-800 text-slate-300 px-2.5 py-1 rounded-lg">화학물질</span>
+                  <span class="bg-slate-800 text-slate-300 px-2.5 py-1 rounded-lg">규제 대응</span>
+                  <span class="bg-amber-400/20 text-amber-300 border border-amber-400/30 px-2.5 py-1 rounded-lg font-bold">D-30</span>
+                </div>
+              </div>
+
+              <button onclick="openModal('reviewModal')" class="self-stretch md:self-auto px-6 py-3 bg-white text-[#0F2942] hover:bg-slate-100 rounded-2xl font-bold text-xs transition flex items-center justify-center space-x-1.5 shadow-sm">
+                <span>사전 검토 바로가기</span>
+                <i data-lucide="chevron-right" class="w-4 h-4"></i>
+              </button>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- 모달 1: AI 지능형 상담 및 문서 분석 모달 (1_2)                             -->
+  <!-- ========================================================================= -->
+  <div id="chatModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl shadow-2xl border border-slate-200 w-full max-w-md overflow-hidden flex flex-col max-h-[85vh] animate-in fade-in zoom-in-95 duration-150">
+      
+      <!-- 헤더 (파란색 바) -->
+      <div class="px-5 py-4 bg-[#0B5CFF] text-white flex items-center justify-between">
+        <div class="flex items-center space-x-2">
+          <div class="w-7 h-7 rounded-full bg-white/20 flex items-center justify-center">
+            <i data-lucide="bot" class="w-4 h-4 text-white"></i>
+          </div>
+          <h3 class="text-sm font-bold tracking-tight">KTR AI 지능형 시험 안내 챗봇</h3>
+        </div>
+        <button onclick="closeModal('chatModal')" class="text-white/80 hover:text-white">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- 본문 메시지 영역 -->
+      <div class="p-5 space-y-4 overflow-y-auto flex-1 text-xs bg-slate-50/50 custom-scrollbar">
+        
+        <!-- AI 말풍선 1 -->
+        <div class="flex items-start space-x-2">
+          <div class="w-7 h-7 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <i data-lucide="bot" class="w-4 h-4"></i>
+          </div>
+          <div class="bg-white p-3.5 rounded-2xl rounded-tl-none border border-slate-200/80 shadow-sm text-slate-700 leading-relaxed max-w-[85%]">
+            문의하신 친환경 세정제 원료에 대한 RoHS 및 화학물질 안전성 시험(KC인증) 분석 결과입니다.
+            <div class="mt-2.5 pt-2 border-t border-slate-100 space-y-1 font-semibold text-slate-800">
+              <div class="flex items-center justify-between">• 시료량: <span class="font-bold text-blue-600">500ml 2병</span></div>
+              <div class="flex items-center justify-between">• 예상 견적: <span class="font-bold text-slate-900">1,450,000원</span></div>
+              <div class="flex items-center justify-between">• 예상 소요일: <span class="font-bold text-slate-900">7영업일</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 액션 버튼들 -->
+        <div class="space-y-2 pl-9">
+          <button onclick="switchToReviewModal()" class="w-full py-3 bg-[#0B5CFF] hover:bg-blue-600 text-white rounded-xl font-bold text-xs shadow-sm flex items-center justify-center space-x-1.5 transition">
+            <i data-lucide="sparkles" class="w-4 h-4"></i>
+            <span>상담 내용으로 시험의뢰서 자동 생성</span>
+          </button>
+          <button onclick="switchToReviewModal()" class="w-full py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl font-semibold text-xs transition flex items-center justify-center space-x-1">
+            <i data-lucide="calculator" class="w-3.5 h-3.5 text-slate-500"></i>
+            <span>시험 수수료 및 지원사업 감면 조회</span>
+          </button>
+        </div>
+
+        <!-- PDF 업로드 점선 드롭존 -->
+        <div class="p-4 rounded-2xl border-2 border-dashed border-blue-300 bg-blue-50/40 text-center cursor-pointer hover:bg-blue-50 transition">
+          <div class="flex flex-col items-center justify-center space-y-1">
+            <i data-lucide="file-up" class="w-6 h-6 text-blue-600"></i>
+            <span class="text-xs font-bold text-slate-800">MSDS / 시험 성적서 PDF 업로드</span>
+            <span class="text-[10px] text-slate-400">(여기에 파일을 끌어다 놓으세요)</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- 푸터 입력창 -->
+      <div class="p-3 bg-white border-t border-slate-100 flex items-center space-x-2">
+        <input type="text" placeholder="궁금한 점을 입력해 주세요..." class="flex-1 bg-slate-100 border-none rounded-xl px-3.5 py-2 text-xs outline-none focus:ring-1 focus:ring-blue-500" />
+        <button class="p-2 text-slate-400 hover:text-slate-600">
+          <i data-lucide="paperclip" class="w-4 h-4"></i>
+        </button>
+        <button class="p-2 text-blue-600 hover:text-blue-700">
+          <i data-lucide="send" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- 모달 2: AI 의뢰서 사전 검증 및 수수료 감면 확정 화면 (1_3)                 -->
+  <!-- ========================================================================= -->
+  <div id="reviewModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl shadow-2xl border border-slate-200 w-full max-w-xl overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+      
+      <!-- 헤더 -->
+      <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+        <div class="flex items-center space-x-2">
+          <span class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold text-xs">AI</span>
+          <h3 class="text-base font-bold text-slate-900">AI 기반 시험 의뢰서 사전 검토 완료</h3>
+        </div>
+        <button onclick="closeModal('reviewModal')" class="text-slate-400 hover:text-slate-600">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- 본문 영역 -->
+      <div class="p-6 space-y-4 text-xs">
+
+        <!-- 추출 데이터 (MSDS 기반) -->
+        <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-slate-800">추출 데이터 (MSDS 기반)</span>
+            <span class="text-[11px] font-semibold text-emerald-600 flex items-center">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1"></span>
+              분석해서 사전 검토 완료
+            </span>
+          </div>
+          <div class="flex flex-wrap gap-2 pt-1 text-[11px]">
+            <span class="px-2.5 py-1 bg-white rounded-lg border border-slate-200 font-semibold text-slate-700">물질명: 메탄올 외 2종</span>
+            <span class="px-2.5 py-1 bg-white rounded-lg border border-slate-200 font-semibold text-slate-700">CAS No: 67-56-1</span>
+            <span class="px-2.5 py-1 bg-white rounded-lg border border-slate-200 font-semibold text-slate-700">유해성 분류</span>
+          </div>
+        </div>
+
+        <!-- 매핑된 시험 규격 -->
+        <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200/80 space-y-2">
+          <span class="font-bold text-slate-800">매핑된 시험 규격</span>
+          <div class="flex items-center space-x-2 pt-0.5">
+            <span class="px-3 py-1 bg-[#0F2942] text-white rounded-lg font-bold text-xs">KS M 0001</span>
+            <span class="px-3 py-1 bg-[#0F2942] text-white rounded-lg font-bold text-xs">RoHS 6대 유해물질 검사</span>
+          </div>
+        </div>
+
+        <!-- 필요 시료 -->
+        <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200/80 flex items-center justify-between">
+          <span class="font-bold text-slate-800">필요 시료</span>
+          <span class="font-bold text-slate-900">시료 수량: 2개 (분석용)</span>
+        </div>
+
+        <!-- 수수료 및 지원 혜택 (녹색 감면 박스) -->
+        <div class="p-4 bg-emerald-50/70 rounded-2xl border border-emerald-200 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-black text-emerald-800">수수료 및 지원 혜택</span>
+            <span class="text-[11px] font-bold bg-emerald-600 text-white px-2.5 py-0.5 rounded-full">중소기업 시험분석 지원사업 30% 수수료 감면 적용 완료</span>
+          </div>
+
+          <div class="pt-2 border-t border-emerald-200/70 space-y-1">
+            <div class="flex justify-between text-slate-500">
+              <span>기본 수수료:</span>
+              <span>1,500,000원</span>
+            </div>
+            <div class="flex justify-between text-emerald-700 font-bold">
+              <span>감면 혜택:</span>
+              <span>-450,000원</span>
+            </div>
+            <div class="flex justify-between items-baseline pt-1 border-t border-emerald-200/50">
+              <span class="font-bold text-slate-800">최종 예상 수수료:</span>
+              <span class="text-lg font-black text-[#0B3B70]">1,050,000원 <span class="text-xs text-slate-400 font-normal">(VAT 별도)</span></span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- 푸터 버튼 액션 -->
+      <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-end space-x-3">
+        <button onclick="closeModal('reviewModal')" class="px-4 py-2.5 border border-slate-200 hover:bg-slate-100 rounded-xl font-bold text-slate-600 text-xs transition">
+          수수료 결제 및 견적서 다운로드
+        </button>
+        <button onclick="submitApplication()" class="px-5 py-2.5 bg-[#0B5CFF] hover:bg-blue-600 text-white rounded-xl font-bold text-xs transition shadow-sm">
+          의뢰서 최종 확인 및 접수
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 스크립트: 아이콘 로드 및 뷰/모달 상태 제어 -->
+  <script>
+    // Lucide 아이콘 초기화
+    lucide.createIcons();
+
+    // 뷰 전환 함수 (대시보드 <-> 나의 현황)
+    function switchView(viewName) {
+      const viewDash = document.getElementById('viewDashboard');
+      const viewStatus = document.getElementById('viewMyStatus');
+      const pageTitle = document.getElementById('pageTitle');
+      const navHome = document.getElementById('navHome');
+      const navStatus = document.getElementById('navStatus');
+      const btnToggle = document.getElementById('btnMyStatusText');
+
+      if (viewName === 'mystatus') {
+        viewDash.classList.add('hidden');
+        viewStatus.classList.remove('hidden');
+        pageTitle.innerText = '나의 현황 (My Dashboard)';
+        btnToggle.innerText = '메인 대시보드 보기';
+        
+        // 사이드바 활성 스타일
+        navHome.className = "w-full flex items-center space-x-3 px-4 py-3 rounded-2xl text-slate-600 hover:bg-slate-50 font-medium text-sm transition";
+        navStatus.className = "w-full flex items-center space-x-3 px-4 py-3 rounded-2xl bg-blue-50 text-[#0B3B70] font-bold text-sm transition";
+      } else {
+        viewStatus.classList.add('hidden');
+        viewDash.classList.remove('hidden');
+        pageTitle.innerText = '대시보드';
+        btnToggle.innerText = '나의 현황 뷰 보기';
+
+        // 사이드바 활성 스타일
+        navHome.className = "w-full flex items-center space-x-3 px-4 py-3 rounded-2xl bg-blue-50 text-[#0B3B70] font-bold text-sm transition";
+        navStatus.className = "w-full flex items-center space-x-3 px-4 py-3 rounded-2xl text-slate-600 hover:bg-slate-50 font-medium text-sm transition";
+      }
+    }
+
+    // 상단 토글 버튼 클릭 시 스위치
+    function toggleMyStatusView() {
+      const viewStatus = document.getElementById('viewMyStatus');
+      if (viewStatus.classList.contains('hidden')) {
+        switchView('mystatus');
+      } else {
+        switchView('dashboard');
+      }
+    }
+
+    // 모달 제어 함수
+    function openModal(id) {
+      document.getElementById(id).classList.remove('hidden');
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.add('hidden');
+    }
+
+    // 챗봇 모달 -> 사전 검토 모달로 바로 전환
+    function switchToReviewModal() {
+      closeModal('chatModal');
+      setTimeout(() => {
+        openModal('reviewModal');
+      }, 100);
+    }
+
+    // 최종 접수 시뮬레이션
+    function submitApplication() {
+      alert('KTR 시험 의뢰서가 성공적으로 접수되었습니다. [접수번호: KTR-2026-0043]');
+      closeModal('reviewModal');
+      switchView('mystatus');
+    }
+  </script>
+</body>
+</html>
